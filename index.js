@@ -5,26 +5,41 @@ const ecs = new AWS.ECS();
 
 const main = async () => {
   const cluster = core.getInput("cluster", { required: true });
-  const taskDefinition = core.getInput("task-definition", { required: true });
+  const taskDefinitionFile = core.getInput("task-definition", { required: true });
   const subnets = core.getMultilineInput("subnets", { required: true });
   const securityGroups = core.getMultilineInput("security-groups", {
     required: true,
   });
-
+  const taskDefPath = path.isAbsolute(taskDefinitionFile) ?
+        taskDefinitionFile :
+        path.join(process.env.GITHUB_WORKSPACE, taskDefinitionFile);
+  const fileContents = fs.readFileSync(taskDefPath, 'utf8');
+  const taskDefContents = maintainValidObjects(removeIgnoredAttributes(cleanNullKeys(yaml.parse(fileContents))));
+  let registerResponse;
+  try {
+    registerResponse = await ecs.registerTaskDefinition(taskDefContents).promise();
+  } catch (error) {
+    core.setFailed("Failed to register task definition in ECS: " + error.message);
+    core.debug("Task definition contents:");
+    core.debug(JSON.stringify(taskDefContents, undefined, 4));
+    throw(error);
+  }
+  const taskDefArn = registerResponse.taskDefinition.taskDefinitionArn;
+  core.setOutput('task-definition-arn', taskDefArn);
   const assignPublicIp =
-    core.getInput("assign-public-ip", { required: false }) || "ENABLED";
+        core.getInput("assign-public-ip", { required: false }) || "ENABLED";
   const overrideContainer = core.getInput("override-container", {
     required: false,
   });
   const overrideContainerCommand = core.getMultilineInput(
-    "override-container-command",
-    {
-      required: false,
-    }
+      "override-container-command",
+      {
+        required: false,
+      }
   );
 
   const taskParams = {
-    taskDefinition,
+    taskDefinition : taskDefArn,
     cluster,
     count: 1,
     launchType: "FARGATE",
@@ -40,23 +55,23 @@ const main = async () => {
   try {
     if (overrideContainerCommand.length > 0 && !overrideContainer) {
       throw new Error(
-        "override-container is required when override-container-command is set"
+          "override-container is required when override-container-command is set"
       );
     }
-
-    if (overrideContainer) {
+ 
+   if (overrideContainer) {
       if (overrideContainerCommand) {
         taskParams.overrides = {
           containerOverrides: [
-            {
-              name: overrideContainer,
-              command: overrideContainerCommand,
-            },
+              {
+                name: overrideContainer,
+                command: overrideContainerCommand,
+              },
           ],
         };
       } else {
         throw new Error(
-          "override-container-command is required when override-container is set"
+            "override-container-command is required when override-container is set"
         );
       }
     }
@@ -80,7 +95,7 @@ const main = async () => {
 
       const taskHash = taskArn.split("/").pop();
       core.info(
-        `task failed, you can check the error on Amazon ECS console: https://console.aws.amazon.com/ecs/home?region=${AWS.config.region}#/clusters/${cluster}/tasks/${taskHash}/details`
+          `task failed, you can check the error on Amazon ECS console: https://console.aws.amazon.com/ecs/home?region=${AWS.config.region}#/clusters/${cluster}/tasks/${taskHash}/details`
       );
     }
   } catch (error) {
