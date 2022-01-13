@@ -5,6 +5,61 @@ const yaml = require('yaml');
 const fs = require('fs');
 
 const ecs = new AWS.ECS();
+// Attributes that are returned by DescribeTaskDefinition, but are not valid RegisterTaskDefinition inputs
+const IGNORED_TASK_DEFINITION_ATTRIBUTES = [
+  'compatibilities',
+  'taskDefinitionArn',
+  'requiresAttributes',
+  'revision',
+  'status',
+  'registeredAt',
+  'deregisteredAt',
+  'registeredBy'
+];
+
+function removeIgnoredAttributes(taskDef) {
+  for (var attribute of IGNORED_TASK_DEFINITION_ATTRIBUTES) {
+    if (taskDef[attribute]) {
+      core.warning(`Ignoring property '${attribute}' in the task definition file. ` +
+        'This property is returned by the Amazon ECS DescribeTaskDefinition API and may be shown in the ECS console, ' +
+        'but it is not a valid field when registering a new task definition. ' +
+        'This field can be safely removed from your task definition file.');
+      delete taskDef[attribute];
+    }
+  }
+
+  return taskDef;
+}
+
+function maintainValidObjects(taskDef) {
+  if (validateProxyConfigurations(taskDef)) {
+    taskDef.proxyConfiguration.properties.forEach((property, index, arr) => {
+      if (!('value' in property)) {
+        arr[index].value = '';
+      }
+      if (!('name' in property)) {
+        arr[index].name = '';
+      }
+    });
+  }
+
+  if(taskDef && taskDef.containerDefinitions){
+    taskDef.containerDefinitions.forEach((container) => {
+      if(container.environment){
+        container.environment.forEach((property, index, arr) => {
+          if (!('value' in property)) {
+            arr[index].value = '';
+          }
+        });
+      }
+    });
+  }
+  return taskDef;
+}
+
+function validateProxyConfigurations(taskDef){
+  return 'proxyConfiguration' in taskDef && taskDef.proxyConfiguration.type && taskDef.proxyConfiguration.type == 'APPMESH' && taskDef.proxyConfiguration.properties && taskDef.proxyConfiguration.properties.length > 0;
+}
 
 const main = async () => {
   const cluster = core.getInput("cluster", { required: true });
@@ -61,8 +116,8 @@ const main = async () => {
           "override-container is required when override-container-command is set"
       );
     }
- 
-   if (overrideContainer) {
+
+    if (overrideContainer) {
       if (overrideContainerCommand) {
         taskParams.overrides = {
           containerOverrides: [
