@@ -17,6 +17,22 @@ const IGNORED_TASK_DEFINITION_ATTRIBUTES = [
   'registeredBy'
 ];
 
+function emptyValueReplacer(_, value) {
+  if (isEmptyValue(value)) {
+    return undefined;
+  }
+
+  if (Array.isArray(value)) {
+    return value.filter(e => !isEmptyValue(e));
+  }
+
+  return value;
+}
+
+function cleanNullKeys(obj) {
+  return JSON.parse(JSON.stringify(obj, emptyValueReplacer));
+}
+
 function removeIgnoredAttributes(taskDef) {
   for (var attribute of IGNORED_TASK_DEFINITION_ATTRIBUTES) {
     if (taskDef[attribute]) {
