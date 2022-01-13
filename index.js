@@ -1,5 +1,8 @@
 const core = require("@actions/core");
 const AWS = require("aws-sdk");
+const path = require('path');
+const yaml = require('yaml');
+const fs = require('fs');
 
 const ecs = new AWS.ECS();
 
