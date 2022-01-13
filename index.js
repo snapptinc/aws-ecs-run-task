@@ -17,6 +17,36 @@ const IGNORED_TASK_DEFINITION_ATTRIBUTES = [
   'registeredBy'
 ];
 
+function isEmptyValue(value) {
+  if (value === null || value === undefined || value === '') {
+    return true;
+  }
+
+  if (Array.isArray(value)) {
+    for (var element of value) {
+      if (!isEmptyValue(element)) {
+        // the array has at least one non-empty element
+        return false;
+      }
+    }
+    // the array has no non-empty elements
+    return true;
+  }
+
+  if (typeof value === 'object') {
+    for (var childValue of Object.values(value)) {
+      if (!isEmptyValue(childValue)) {
+        // the object has at least one non-empty property
+        return false;
+      }
+    }
+    // the object has no non-empty property
+    return true;
+  }
+
+  return false;
+}
+
 function emptyValueReplacer(_, value) {
   if (isEmptyValue(value)) {
     return undefined;
