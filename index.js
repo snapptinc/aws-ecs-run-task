@@ -184,7 +184,21 @@ const main = async () => {
     let task = await ecs.runTask(taskParams).promise();
     const taskArn = task.tasks[0].taskArn;
     core.setOutput("task-arn", taskArn);
+    let started = false;
+    start = new Date();
+    while(!started) {
+      core.debug("Waiting for task to start...");
+      try {
+        await ecs.waitFor("tasksStarted", { cluster, tasks: [taskArn] }).promise();
+        started = true;
+      } catch(error) {
+        core.info(`Failed to get started data ${error.message}`);
+        if((now - start) > 600000) {
+          throw new Error('Timed out waiting for the container to start');
+        }
+      }
 
+    }
     core.debug("Waiting for task to finish...");
     await ecs.waitFor("tasksStopped", { cluster, tasks: [taskArn] }).promise();
 
