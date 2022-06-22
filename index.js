@@ -196,7 +196,7 @@ const main = async () => {
     while(!started) {
       await wait(10000);
       try {
-        await ecs.waitFor("tasksStarted", { cluster, tasks: [taskArn] }).promise();
+        await ecs.waitFor("tasksRunning", { cluster, tasks: [taskArn] }).promise();
         started = true;
       } catch(error) {
         core.debug(`${cluster}:${taskArn} Failed to get started data ${error.message}`);
