@@ -1,6 +1,6 @@
 {
   "name": "aws_ecs_run_task",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "main": "index.js",
   "repository": "https://github.com/noelzubin/aws-ecs-run-task",
   "author": "noelzubin <noelzubinvictor@gmail.com>",
@@ -9,11 +9,11 @@
     "package": "ncc build index.js -o dist"
   },
   "dependencies": {
-    "@actions/core": "^1.6.0",
-    "aws-sdk": "^2.1037.0",
-    "yaml": "^1.10.2"
+    "@actions/core": "^1.9.0",
+    "aws-sdk": "^2.1158.0",
+    "yaml": "^2.1.1"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.32.0"
+    "@vercel/ncc": "^0.34.0"
   }
 }
