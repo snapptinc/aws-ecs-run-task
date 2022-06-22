@@ -1,8 +1,8 @@
 {
-  "name": "aws_ecs_run_task",
+  "name": "@snapptinc/aws_ecs_run_task",
   "version": "1.0.8",
   "main": "index.js",
-  "repository": "https://github.com/noelzubin/aws-ecs-run-task",
+  "repository": "https://github.com/snapptinc/aws-ecs-run-task",
   "author": "noelzubin <noelzubinvictor@gmail.com>",
   "license": "MIT",
   "scripts": {
