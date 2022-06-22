@@ -193,6 +193,7 @@ const main = async () => {
         started = true;
       } catch(error) {
         core.info(`Failed to get started data ${error.message}`);
+        let now = new Date();
         if((now - start) > 600000) {
           throw new Error('Timed out waiting for the container to start');
         }
