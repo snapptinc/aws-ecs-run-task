@@ -192,22 +192,22 @@ const main = async () => {
     core.setOutput("task-arn", taskArn);
     let started = false;
     start = new Date();
+    core.info(`Waiting for task to start3 ${cluster}:${taskArn}`);
     while(!started) {
-      core.debug("Waiting for task to start3 ${cluster}:${taskArn}");
-      await wait(30000);
+      await wait(10000);
       try {
         await ecs.waitFor("tasksStarted", { cluster, tasks: [taskArn] }).promise();
         started = true;
       } catch(error) {
-        core.info(`Failed to get started data ${error.message}`);
+        core.debug(`${cluster}:${taskArn} Failed to get started data ${error.message}`);
         let now = new Date();
-        if((now - start) > 600000) {
+        if((now - start) > 300000) {
           throw new Error('Timed out waiting for the container to start');
         }
       }
 
     }
-    core.debug("Waiting for task to finish ${cluster}:${taskArn}");
+    core.info(`Waiting for task to finish ${cluster}:${taskArn}`);
     await ecs.waitFor("tasksStopped", { cluster, tasks: [taskArn] }).promise();
 
     core.debug("Checking status of task");
