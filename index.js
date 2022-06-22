@@ -103,6 +103,12 @@ function maintainValidObjects(taskDef) {
   return taskDef;
 }
 
+function wait(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 function validateProxyConfigurations(taskDef){
   return 'proxyConfiguration' in taskDef && taskDef.proxyConfiguration.type && taskDef.proxyConfiguration.type == 'APPMESH' && taskDef.proxyConfiguration.properties && taskDef.proxyConfiguration.properties.length > 0;
 }
@@ -187,6 +193,7 @@ const main = async () => {
     let started = false;
     start = new Date();
     while(!started) {
+      wait(30000);
       core.debug("Waiting for task to start...");
       try {
         await ecs.waitFor("tasksStarted", { cluster, tasks: [taskArn] }).promise();
