@@ -193,8 +193,8 @@ const main = async () => {
     let started = false;
     start = new Date();
     while(!started) {
+      core.debug("Waiting for task to start3 ${cluster}:${taskArn}");
       await wait(30000);
-      core.debug("Waiting for task to start...");
       try {
         await ecs.waitFor("tasksStarted", { cluster, tasks: [taskArn] }).promise();
         started = true;
@@ -207,7 +207,7 @@ const main = async () => {
       }
 
     }
-    core.debug("Waiting for task to finish...");
+    core.debug("Waiting for task to finish ${cluster}:${taskArn}");
     await ecs.waitFor("tasksStopped", { cluster, tasks: [taskArn] }).promise();
 
     core.debug("Checking status of task");

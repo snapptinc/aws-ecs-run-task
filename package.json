@@ -1,6 +1,6 @@
 {
   "name": "@snapptinc/aws_ecs_run_task",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "main": "index.js",
   "repository": "https://github.com/snapptinc/aws-ecs-run-task",
   "author": "noelzubin <noelzubinvictor@gmail.com>",
