@@ -9,7 +9,7 @@
     "package": "ncc build index.js -o dist"
   },
   "dependencies": {
-    "@actions/core": "^1.9.0",
+    "@actions/core": "^1.9.1",
     "aws-sdk": "^2.1158.0",
     "yaml": "^2.1.1"
   },
