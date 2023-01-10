@@ -192,7 +192,7 @@ const main = async () => {
     core.setOutput("task-arn", taskArn);
     let started = false;
     start = new Date();
-    core.info(`Waiting for task to start3 ${cluster}:${taskArn}`);
+    core.info(`Waiting for task to start ${cluster}:${taskArn}`);
     while(!started) {
       await wait(10000);
       try {
@@ -217,7 +217,7 @@ const main = async () => {
     if (exitCode === 0) {
       core.setOutput("status", "success");
     } else {
-      core.setFailed(task.tasks[0].stoppedReason);
+      core.setFailed(`non-zero exit code: ${task.tasks[0].stoppedReason}`);
 
       const taskHash = taskArn.split("/").pop();
       core.info(
@@ -225,7 +225,7 @@ const main = async () => {
       );
     }
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(`error catched: ${error.message}`);
   }
 };
 
